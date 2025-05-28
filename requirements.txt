@@ -1,0 +1,5 @@
+aiohttp==3.11.10
+pydantic==2.10.3    
+streamlit==1.41.1   
+python-dotenv==1.0.1
+fastapi==0.115.6   

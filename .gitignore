@@ -1,0 +1,7 @@
+venv/
+test.py
+provider_hashes.py
+__pycache__/
+.env
+
+booking_assistant.log
