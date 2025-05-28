@@ -3,19 +3,15 @@ import asyncio
 from hevai_api import send_booking_assistant_message, get_valid_timezones, validate_timezone
 import uuid
 import hashlib
-import os
-from dotenv import load_dotenv
 import logging
 import pytz
 import datetime
-
-# Cargar variables de entorno
-load_dotenv()
+from config import ENVIRONMENT_URLS, DEFAULT_ENVIRONMENT, ENVIRONMENT_DESCRIPTIONS, LOG_LEVEL, LOG_FORMAT
 
 # Configurar logging
 logging.basicConfig(
-    level=logging.DEBUG,
-    format='%(asctime)s - %(levelname)s - %(message)s'
+    level=getattr(logging, LOG_LEVEL),
+    format=LOG_FORMAT
 )
 
 st.title("Asistente de Reservas HEVA")
@@ -33,38 +29,8 @@ if "provider_id" not in st.session_state:
 if "timezone" not in st.session_state:
     st.session_state.timezone = "America/New_York"  # Zona horaria predeterminada
 
-# Diccionario de nombres de providers
-PROVIDER_NAMES = {
-    1: "Luxe Hair Restoration Clinic",
-    2: "Radiant Skin Dermatology Center",
-    3: "Bright Smile Dental Clinic",
-    5: "Dr. Espinal Plastic Surgery",
-    6: "Dr. Molina Cirujano Plastico Reconstructiva y Estetica",
-    7: "Dra. Güilamo",
-    8: "Dr. Welbin Paredes",
-    9: "Dr. Jesus Abreu",
-    10: "Dr Carlos Alverto Lopez Collado",
-    11: "Dr. José León MD",
-    12: "Dr. Yoiner Manuel Cedeño Rodríguez (Centro Cosme Surgery)",
-    13: "Dr. Diego Valentín Tello ",
-    14: "Dr. Humberto González O.",
-    15: "Dra. Danivel Céspedes",
-    16: "Dr. Daniel Lluberes",
-    17: "Dra. Brendha Ogando",
-    18: "Dra. Adriana Salcedo ",
-    19: "Dr. Castillejos",
-    20: "Dr. Bary G. Bigay",
-    21: "Dr. Josué Safadit",
-    22: "Dra. Thaulys  Luna",
-    23: "Dra. Alexandrish Karvendrish Cirugía Plástica",
-    24: "Dr. Erik Alvarez Sores",
-    25: "Dr. Ivan Silva",
-    26: "Dra. Romy Campos",
-    28: "Dr. Nishita's Cosmetic Clinic",
-    29: "Dr. Carlos Gutiérrez Banda",
-    30: "Dr. Luis Ornelas",
-    31: "Xavier Sanchez"
-}
+if "environment" not in st.session_state:
+    st.session_state.environment = DEFAULT_ENVIRONMENT  # Entorno predeterminado
 
 # Lista de zonas horarias más comunes para facilitar la selección al usuario
 POPULAR_TIMEZONES = [
@@ -107,7 +73,53 @@ def update_timezone(timezone):
 
 # Barra lateral para el token de acceso y configuraciones
 with st.sidebar:
-    access_token = st.text_input("Introduce el Provider Access Token", type="password")
+    access_token = st.text_input("Introduce el Token de Acceso", type="password")
+    provider_id = st.number_input(
+        "Número de Provider",
+        min_value=1,
+        max_value=31,
+        value=1,
+        step=1,
+        help="Selecciona el número de provider con el que deseas interactuar"
+    )
+    
+    # Selector de entorno
+    st.subheader("Configuración de Entorno")
+    selected_environment = st.selectbox(
+        "Selecciona el entorno:",
+        options=list(ENVIRONMENT_URLS.keys()),
+        index=list(ENVIRONMENT_URLS.keys()).index(st.session_state.environment),
+        format_func=lambda x: f"{x.upper()} - {ENVIRONMENT_DESCRIPTIONS[x]}",
+        help="Selecciona el entorno donde se ejecutará la API"
+    )
+    
+    # Actualizar el entorno si cambió
+    if selected_environment != st.session_state.environment:
+        st.session_state.environment = selected_environment
+        st.success(f"Entorno actualizado: {selected_environment.upper()}")
+        # Reiniciar la conversación cuando se cambie de entorno
+        st.session_state.conversation_id = str(uuid.uuid4())
+        st.session_state.messages = []
+        st.info("Nueva conversación iniciada para el nuevo entorno")
+    
+    # Mostrar solo el nombre del entorno actual
+    st.info(f"Entorno actual: {st.session_state.environment.upper()}")
+    
+    # Verificar token de acceso
+    if access_token:
+        # Verificar contra el token único
+        try:
+            if access_token.lower() == st.secrets["ACCESS_TOKEN"].lower():
+                st.session_state.provider_id = provider_id
+                st.success(f"Token válido - Provider ID: {provider_id}")
+            else:
+                st.error("Token de acceso inválido")
+                st.session_state.provider_id = None
+                logging.warning("Intento de acceso con token inválido")
+        except Exception as e:
+            st.error("Error al verificar el token de acceso")
+            st.session_state.provider_id = None
+            logging.error(f"Error en la verificación del token: {str(e)}")
     
     # Selector de zona horaria con opciones comunes/populares
     st.subheader("Configuración de Zona Horaria")
@@ -220,27 +232,12 @@ with st.sidebar:
         st.info(f"UTC Offset: {current_time.utcoffset()}")
     except Exception as e:
         st.error(f"Error al obtener información de la zona horaria: {str(e)}")
-    
-    # Verificar token de acceso
-    if access_token:
-        # Verificar contra los provider hashes
-        provider_found = False
-        for i in [*range(1, 4), *range(5, 32)]:  # Modificado para incluir hasta el provider 31
-            env_hash = os.getenv(f'PROVIDER_HASH_{i}')
-            if env_hash and access_token.lower() == env_hash.lower():
-                st.session_state.provider_id = i
-                provider_found = True
-                provider_name = PROVIDER_NAMES.get(i, f"Provider {i}")
-                st.success(f"Token válido para: {provider_name}")
-                break
-        
-        if not provider_found:
-            st.error("Token de acceso inválido")
-            logging.warning("Intento de acceso con token inválido")
 
 # Debug log
 logging.debug("Estado de autenticación: %s", "Autenticado" if st.session_state.provider_id else "No autenticado")
 logging.debug(f"Zona horaria seleccionada: {st.session_state.timezone}")
+logging.debug(f"Entorno seleccionado: {st.session_state.environment}")
+logging.debug(f"URL de la API: {ENVIRONMENT_URLS[st.session_state.environment]}")
 
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
@@ -262,7 +259,7 @@ if prompt := st.chat_input("¿En qué puedo ayudarte?"):
                     conversation_id=st.session_state.conversation_id,
                     user_message=prompt,
                     timezone=st.session_state.timezone,  # Usar la zona horaria seleccionada
-                    base_url=os.getenv("base_url")
+                    base_url=ENVIRONMENT_URLS[st.session_state.environment]
                 ))
                 # Procesar la respuesta para mostrarla correctamente
                 import ast

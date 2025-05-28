@@ -5,6 +5,7 @@ import logging
 from urllib.parse import urljoin
 import asyncio
 import pytz  # Importamos pytz para validar las zonas horarias
+from config import API_MAX_RETRIES, API_RETRY_DELAY, API_TIMEOUT
 
 # Lista de todas las zonas horarias
 ALL_TIMEZONES = list(pytz.all_timezones)
@@ -76,8 +77,8 @@ async def send_booking_assistant_message(
     """
     logging.info(f"Sending message to booking assistant - Provider: {provider_id}, Conversation: {conversation_id}")
     
-    MAX_RETRIES = 5
-    RETRY_DELAY = 1  # segundos
+    MAX_RETRIES = API_MAX_RETRIES
+    RETRY_DELAY = API_RETRY_DELAY  # segundos
 
     # Si no se proporciona timezone, usar UTC
     timezone = timezone or "UTC"
@@ -94,7 +95,7 @@ async def send_booking_assistant_message(
         "clienttimezone": timezone
     }
     
-    async with aiohttp.ClientSession() as session:
+    async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=API_TIMEOUT)) as session:
         url = urljoin(base_url, "booking-assistant")
         
         for attempt in range(1, MAX_RETRIES + 1):

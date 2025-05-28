@@ -3,5 +3,34 @@ test.py
 provider_hashes.py
 __pycache__/
 .env
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
 
 booking_assistant.log
+*.log
+.streamlit/secrets.toml
+
+# Local configuration overrides
+config_local.py
+
+# Test files
+test_config.py
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
