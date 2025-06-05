@@ -45,10 +45,10 @@ ACCESS_TOKEN = "your_access_token"
 
 [environments]
 # Development environment URL
-dev = "https://heva-ia-backend-dev-398779387998.us-central1.run.app"
+dev = "dev_url"
 
 # Production environment URL  
-prod = "https://heva-ia-backend-prd-398779387998.us-east1.run.app"
+prod = "prod_url"
 
 # Local development URL
 local = "http://localhost:8000"
