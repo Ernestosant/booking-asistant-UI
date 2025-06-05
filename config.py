@@ -1,20 +1,6 @@
-"""
-Configuration file for HEVA Booking Assistant
-Contains environment URLs and other configuration settings
-"""
-
-import tomli
 from pathlib import Path
 
-# Load secrets from secrets.toml
-def load_secrets():
-    secrets_path = Path(__file__).parent / "secrets.toml"
-    with open(secrets_path, "rb") as f:
-        return tomli.load(f)
 
-# Load environment URLs from secrets
-secrets = load_secrets()
-ENVIRONMENT_URLS = secrets["environment_urls"]
 
 # Default environment
 DEFAULT_ENVIRONMENT = "local"
@@ -27,7 +13,7 @@ ENVIRONMENT_DESCRIPTIONS = {
 }
 
 # API Configuration
-API_TIMEOUT = 30  # seconds
+API_TIMEOUT = 300  # seconds
 API_MAX_RETRIES = 5
 API_RETRY_DELAY = 1  # seconds
 

@@ -9,7 +9,7 @@ A Streamlit-based user interface for the HEVA Booking Assistant system that help
 - Real-time chat interface with timezone support
 - Conversation persistence within sessions
 - Support for multiple healthcare providers (1-31)
-- Environment-based configuration
+- Environment-based configuration using Streamlit secrets
 - Automatic conversation reset when switching environments
 
 ## Requirements
@@ -29,25 +29,37 @@ pip install -r requirements.txt
 
 ### Environment URLs
 
-The application supports three environments, configured in `config.py`:
+The application supports three environments, with URLs configured in `.streamlit/secrets.toml`:
 
-- **Local**: Development environment
+- **Local**: Development environment (`http://localhost:8000`)
 - **Development**: Testing environment in Google Cloud
 - **Production**: Production environment in Google Cloud
 
 ### Secrets Configuration
 
-Create or update `.streamlit/secrets.toml` with the following structure:
+Create `.streamlit/secrets.toml` with the following structure:
 
 ```toml
-# Provider Hashes (1-31)
+[general]
+ACCESS_TOKEN = "your_access_token"
+
+[environments]
+# Development environment URL
+dev = "https://heva-ia-backend-dev-398779387998.us-central1.run.app"
+
+# Production environment URL  
+prod = "https://heva-ia-backend-prd-398779387998.us-east1.run.app"
+
+# Local development URL
+local = "http://localhost:8000"
+
+# Provider Hashes (1-31) - Optional
 PROVIDER_HASH_1 = "your_provider_hash_1"
 PROVIDER_HASH_2 = "your_provider_hash_2"
-# ... continue for all providers
-
-# Access Token
-ACCESS_TOKEN = "your_access_token"
+# ... continue for all providers as needed
 ```
+
+**Note**: You can use `.streamlit/secrets.toml.example` as a template.
 
 ## Running the Application
 

@@ -6,7 +6,28 @@ import hashlib
 import logging
 import pytz
 import datetime
-from config import ENVIRONMENT_URLS, DEFAULT_ENVIRONMENT, ENVIRONMENT_DESCRIPTIONS, LOG_LEVEL, LOG_FORMAT
+from config import DEFAULT_ENVIRONMENT, ENVIRONMENT_DESCRIPTIONS, LOG_LEVEL, LOG_FORMAT
+
+# Function to get environment URLs from secrets
+def get_environment_urls():
+    """
+    Get environment URLs from Streamlit secrets
+    
+    Returns:
+        dict: Dictionary with environment names and their corresponding URLs
+    """
+    try:
+        return {
+            "local": st.secrets["environments"]["local"],
+            "dev": st.secrets["environments"]["dev"], 
+            "prod": st.secrets["environments"]["prod"]
+        }
+    except KeyError as e:
+        st.error(f"Environment URL not found in secrets: {e}")
+        
+
+# Get environment URLs
+ENVIRONMENT_URLS = get_environment_urls()
 
 # Configurar logging
 logging.basicConfig(
