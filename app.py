@@ -95,6 +95,16 @@ def update_timezone(timezone):
 # Barra lateral para el token de acceso y configuraciones
 with st.sidebar:
     access_token = st.text_input("Introduce el Token de Acceso", type="password")
+    
+    # Mostrar el conversation_id actual
+    st.subheader("ID de Conversación")
+    st.text_input(
+        "Conversation ID:",
+        value=st.session_state.conversation_id,
+        disabled=True,
+        help="Este es el ID único de tu conversación actual. Se genera automáticamente y se reinicia cuando cambias de entorno."
+    )
+    
     provider_id = st.number_input(
         "Número de Provider",
         min_value=1,
