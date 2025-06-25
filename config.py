@@ -3,7 +3,7 @@ from pathlib import Path
 
 
 # Default environment
-DEFAULT_ENVIRONMENT = "local"
+DEFAULT_ENVIRONMENT = "prod"
 
 # Environment descriptions for UI
 ENVIRONMENT_DESCRIPTIONS = {

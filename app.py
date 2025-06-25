@@ -51,7 +51,7 @@ if "timezone" not in st.session_state:
     st.session_state.timezone = "America/New_York"  # Zona horaria predeterminada
 
 if "environment" not in st.session_state:
-    st.session_state.environment = DEFAULT_ENVIRONMENT  # Entorno predeterminado
+    st.session_state.environment = "prod"  # Cambiar el entorno predeterminado a 'prod'
 
 # Lista de zonas horarias más comunes para facilitar la selección al usuario
 POPULAR_TIMEZONES = [
@@ -108,7 +108,6 @@ with st.sidebar:
     provider_id = st.number_input(
         "Número de Provider",
         min_value=1,
-        max_value=31,
         value=1,
         step=1,
         help="Selecciona el número de provider con el que deseas interactuar"
